@@ -15,7 +15,7 @@ Get it from NuGet:
 
 ## Initialization
 Install NuGet(s)
-Add .UseSharpnadoShadowsCompat() to your MAUI app builder.
+Add `.UseSharpnadoShadowsCompat()` to your MAUI app builder.
 
 
 ## Original documentation

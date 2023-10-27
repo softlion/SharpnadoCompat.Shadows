@@ -1,43 +1,52 @@
 ﻿using System.ComponentModel;
 using Android.Content;
+using Android.Views;
 using Android.Widget;
 using Microsoft.Maui.Controls.Compatibility.Platform.Android.AppCompat;
 using Microsoft.Maui.Controls.Platform;
+using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using Sharpnado.Shades.Droid;
 
 namespace Sharpnado.Shades.Droid
 {
-    public class AndroidShadowsRenderer : ViewRenderer<Shadows, FrameLayout>
+    public class AndroidShadowsRenderer : ViewHandler<Shadows, FrameLayout>
     {
+        public static IPropertyMapper<Shadows, AndroidShadowsRenderer> Mapper = new PropertyMapper<Shadows, AndroidShadowsRenderer>() { };
+        public static CommandMapper<Shadows, AndroidShadowsRenderer> CommandMapper = new CommandMapper<Shadows, AndroidShadowsRenderer>() { };
+
         private static int instanceCount;
 
         private ShadowView _shadowView;
 
         private string _tag = nameof(AndroidShadowsRenderer);
 
-        public AndroidShadowsRenderer(Context context)
-            : base(context)
+        protected Shadows Element => VirtualView;
+
+        private LayoutChangeListener _listner;
+
+        public AndroidShadowsRenderer() : base(Mapper, CommandMapper)
         {
+            _listner = new LayoutChangeListener(OnLayout);
         }
 
-        protected override void OnElementChanged(ElementChangedEventArgs<Shadows> e)
+        protected override void ConnectHandler(FrameLayout platformView)
         {
-            base.OnElementChanged(e);
 
-            if (e.NewElement == null)
+            base.ConnectHandler(platformView);
+            platformView.AddOnLayoutChangeListener(_listner);
+            VirtualView.PropertyChanged += OnElementPropertyChanged;
+
+            if (!_shadowView.IsNullOrDisposed())
             {
-                if (!_shadowView.IsNullOrDisposed())
-                {
-                    _shadowView.RemoveFromParent();
-                    _shadowView.Dispose();
-                }
+                _shadowView.RemoveFromParent();
+                _shadowView.Dispose();
             }
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void DisconnectHandler(FrameLayout platformView)
         {
-            base.Dispose(disposing);
+            base.DisconnectHandler(platformView);
 
             if (!_shadowView.IsNullOrDisposed())
             {
@@ -47,17 +56,15 @@ namespace Sharpnado.Shades.Droid
 
             instanceCount--;
 
-            InternalLogger.Debug(_tag, () => $"Disposed( disposing: {disposing} ) => {instanceCount} instances");
+            InternalLogger.Debug(_tag, () => $"Disposed( => {instanceCount} instances");
         }
 
-        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            base.OnElementPropertyChanged(sender, e);
-
             switch (e.PropertyName)
             {
                 case "Renderer":
-                    var content = GetChildAt(0);
+                    var content = PlatformView.GetChildAt(0);
                     if (content == null)
                     {
                         return;
@@ -75,7 +82,7 @@ namespace Sharpnado.Shades.Droid
 
                         Element.WeakCollectionChanged += _shadowView.ShadesSourceCollectionChanged;
 
-                        AddView(_shadowView, 0);
+                        PlatformView.AddView(_shadowView, 0);
 
                         instanceCount++;
                         InternalLogger.Debug(_tag, () => $"Create ShadowView => {instanceCount} instances");
@@ -93,19 +100,41 @@ namespace Sharpnado.Shades.Droid
             }
         }
 
-        protected override void OnLayout(bool changed, int l, int t, int r, int b)
+
+        protected void OnLayout(bool changed, int l, int t, int r, int b)
         {
-            base.OnLayout(changed, l, t, r, b);
 
             InternalLogger.Debug(_tag, () => $"OnLayout( {l}l, {t}t, {r}r, {b}b )");
 
-            var children = GetChildAt(1);
+            var children = PlatformView.GetChildAt(1);
             if (children == null)
             {
                 return;
             }
 
             _shadowView?.Layout(children.MeasuredWidth, children.MeasuredHeight);
+        }
+
+        protected override FrameLayout CreatePlatformView()
+        {
+            return new FrameLayout(Platform.CurrentActivity);
+        }
+    }
+
+    public class LayoutChangeListener : Java.Lang.Object, Android.Views.View.IOnLayoutChangeListener
+    {
+        private readonly Action<bool, int, int, int, int> onChanged;
+
+        public LayoutChangeListener(Action<bool, int, int, int, int> onChanged)
+        {
+            this.onChanged = onChanged;
+        }
+
+        public void OnLayoutChange(Android.Views.View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom)
+        {
+            var changed = left != oldLeft || top != oldTop || right != oldRight || bottom != oldBottom;
+
+            onChanged(changed, left, top, right, bottom);
         }
     }
 }

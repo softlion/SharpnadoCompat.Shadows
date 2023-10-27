@@ -1,20 +1,23 @@
 ﻿using CoreAnimation;
 using CoreGraphics;
-using Microsoft.Maui.Controls.Compatibility.Platform.iOS;
 using Microsoft.Maui.Controls.Platform;
+using Microsoft.Maui.Handlers;
 using System.ComponentModel;
 using UIKit;
 
 namespace Sharpnado.Shades.iOS
 {
-    public class iOSShadowsRenderer : VisualElementRenderer<Shadows>
+    public class iOSShadowsRenderer : ViewHandler<Shadows, UIView>
     {
+        public static IPropertyMapper<Shadows, iOSShadowsRenderer> Mapper = new PropertyMapper<Shadows, iOSShadowsRenderer>() { };
+        public static CommandMapper<Shadows, iOSShadowsRenderer> CommandMapper = new CommandMapper<Shadows, iOSShadowsRenderer>() { };
+
         private static int instanceCount;
 
         private string _tag = nameof(iOSShadowsRenderer);
 
         private iOSShadowsController _shadowsController;
-
+        protected Shadows Element => VirtualView;
         private CALayer _shadowsLayer;
 
         public static void Initialize()
@@ -22,36 +25,37 @@ namespace Sharpnado.Shades.iOS
             var preserveRenderer = typeof(iOSShadowsRenderer);
         }
 
-        public override void LayoutSublayersOfLayer(CALayer layer)
+        public iOSShadowsRenderer() : base(Mapper, CommandMapper)
         {
-            base.LayoutSublayersOfLayer(layer);
+        }
 
+        public void LayoutSublayersOfLayer(CALayer layer)
+        {
             _shadowsController?.OnLayoutSubLayers();
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void DisconnectHandler(UIView platformView)
         {
-            base.Dispose(disposing);
+            base.DisconnectHandler(platformView);
 
-            if (disposing)
-            {
-                _shadowsController?.Dispose();
-                _shadowsController = null;
+            _shadowsController?.Dispose();
+            _shadowsController = null;
 
-                _shadowsLayer?.Dispose();
-                _shadowsLayer = null;
-            }
+            _shadowsLayer?.Dispose();
+            _shadowsLayer = null;
 
             instanceCount--;
 
-            InternalLogger.Debug(_tag, () => $"Disposed( disposing: {disposing} ) => {instanceCount} instances");
+            InternalLogger.Debug(_tag, () => $"Disposed( " +
+            $" => {instanceCount} instances");
         }
 
-        protected override void OnElementChanged(ElementChangedEventArgs<Shadows> e)
+        protected override void ConnectHandler(UIView platformView)
         {
-            base.OnElementChanged(e);
+            base.ConnectHandler(platformView);
+            Element.PropertyChanged += OnElementPropertyChanged;
 
-            if (e.NewElement == null)
+            if (_shadowsController != null)
             {
                 _shadowsController?.Dispose();
                 _shadowsController = null;
@@ -61,16 +65,14 @@ namespace Sharpnado.Shades.iOS
                 return;
             }
 
-            if (_shadowsController == null && Subviews.Length > 0)
+            if (_shadowsController == null && platformView.Subviews.Length > 0)
             {
-                CreateShadowController(Subviews[0], e.NewElement);
+                CreateShadowController(platformView.Subviews[0], this.Element);
             }
         }
 
-        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        protected void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            base.OnElementPropertyChanged(sender, e);
-
             switch (e.PropertyName)
             {
                 case "Renderer":
@@ -88,17 +90,38 @@ namespace Sharpnado.Shades.iOS
 
         private void CreateShadowController(UIView shadowSource, Shadows formsElement)
         {
-            Layer.BackgroundColor = new CGColor(0, 0, 0, 0);
-            Layer.MasksToBounds = false;
+            this.PlatformView.Layer.BackgroundColor = new CGColor(0, 0, 0, 0);
+            this.PlatformView.Layer.MasksToBounds = false;
 
             _shadowsLayer = new CALayer { MasksToBounds = false };
-            Layer.InsertSublayer(_shadowsLayer, 0);
+            this.PlatformView.Layer.InsertSublayer(_shadowsLayer, 0);
 
-            _shadowsController = new iOSShadowsController(shadowSource, _shadowsLayer,  formsElement.CornerRadius);
+            _shadowsController = new iOSShadowsController(shadowSource, _shadowsLayer, formsElement.CornerRadius);
             _shadowsController.UpdateShades(formsElement.Shades);
 
             instanceCount++;
             InternalLogger.Debug(_tag, () => $"Create ShadowView => {instanceCount} instances");
+        }
+
+        protected override UIView CreatePlatformView()
+        {
+            return new UIViewCustom(LayoutSublayersOfLayer);
+        }
+    }
+
+    public class UIViewCustom : UIView
+    {
+        private readonly Action<CALayer> _onLayoutSubLayers;
+
+        public UIViewCustom(Action<CALayer> onSublayers)
+        {
+            _onLayoutSubLayers = onSublayers;
+        }
+
+        public override void LayoutSublayersOfLayer(CALayer layer)
+        {
+            base.LayoutSublayersOfLayer(layer);
+            _onLayoutSubLayers(layer);
         }
     }
 }

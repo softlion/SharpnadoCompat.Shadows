@@ -27,9 +27,9 @@
             builder.ConfigureMauiHandlers((handlers) =>
             {
 #if ANDROID
-                handlers.AddHandler(typeof(Shadows), typeof(Sharpnado.Shades.Droid.AndroidShadowsRenderer));
+                handlers.AddHandler<Shadows, Sharpnado.Shades.Droid.AndroidShadowsRenderer>();
 #elif IOS
-                handlers.AddHandler(typeof(Shadows), typeof(Sharpnado.Shades.iOS.iOSShadowsRenderer));
+                handlers.AddHandler<Shadows, Sharpnado.Shades.iOS.iOSShadowsRenderer>();
 #endif
             });
 

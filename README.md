@@ -4,7 +4,7 @@ Forked from the amazingly popular original Sharpnado.Shadows Library, this Compa
 
 Get it from NuGet:
 
-[![Nuget](https://img.shields.io/nuget/v/ShadowsCompat .svg)](https://www.nuget.org/packages/ShadowsCompat)
+[![Nuget](https://img.shields.io/nuget/v/ShadowsCompat.svg)](https://www.nuget.org/packages/ShadowsCompat)
 
 | Supported platforms        |
 |----------------------------|
@@ -15,7 +15,7 @@ Get it from NuGet:
 
 ## Initialization
 Install NuGet(s)
-Add .UseSharpnadoShadowsCompat() to your MAUI app builder.
+Add `.UseSharpnadoShadowsCompat()` to your MAUI app builder.
 
 
 ## Original documentation

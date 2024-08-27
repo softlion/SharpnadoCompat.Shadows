@@ -1,22 +1,79 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
-    <!-- TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks -->
+    <PropertyGroup>
+        <TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
+        <!-- TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks -->
+        
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <OutputType>Library</OutputType>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+        <!-- SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion -->
+        
+        <!-- GeneratePackageOnBuild>True</GeneratePackageOnBuild -->
+    </PropertyGroup>
 
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
-    <OutputType>Library</OutputType>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <!--  nuget configurable properties -->
+    <PropertyGroup>
+        <Version>6.0.1</Version>
+        <VersionSuffix></VersionSuffix>
+        <DefineConstants>$(DefineConstants);</DefineConstants>
+    </PropertyGroup>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-    <!-- SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.19041.0</SupportedOSPlatformVersion -->
+    <ItemGroup>
+        <None Include="../../LICENSE" Pack="true" PackagePath="" />
+        <None Include="../../README.md" Pack="true" PackagePath="" />
+<!--        <None Include="../icon.png" Pack="true" PackagePath="" />-->
+        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
+    </ItemGroup>
 
-    <!-- GeneratePackageOnBuild>True</GeneratePackageOnBuild -->
-    <Version>6.0.1</Version>
+    <PropertyGroup>
+        <PackageId>Sharpnado.Shadows</PackageId>
+
+        <Summary>Add as many custom shadows as you like to any Xamarin.Forms view (Android, iOS, UWP, Tizen). You can set Color, Opacity, Blur, Offset and CornerRadius. Easily achieve neumorphism.</Summary>
+        <PackageTags>xamarin.forms android ios uwp tizen netstandard shadow blur color shadows neumorphism</PackageTags>
+        <Title>Add as many custom shadows (Color, Offset, Blur, Neumorphism) as you like to any Xamarin.Forms view (Android, iOS, UWP, Tizen). </Title>
+        <Description>
+          Maui compat version for Sharpnado Shadows.
+          
+          Add as many custom shadows as you like to any maui view (Android, iOS).
+        
+          * You can specify each shadow Color, Opacity, Blur, and Offset
+          * You can add one shadow, 3 shadows, 99 shadows, to any Xamarin.Forms element
+          * Implement easily Neumorphism
+          * Animate any of these property and make the shadows dance around your elements
+          * The only dependency is `Xamarin.Forms`, no `AndroidX`, no `SkiaSharp` (except Tizen) needed!
+        
+          Performance: Implemented with custom draw on Android, CALayer on iOS, SpriteVisual on UWP, SkiaSharp on Tizen.
+        
+          Mandatory initialization:
+        
+          Add `.UseSharpnadoShadowsCompat()` to your MAUI app builder.
+        </Description>
+        <Product>$(AssemblyName) ($(TargetFramework))</Product>
+        <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+        <Authors>Jean-Marie Alfonsi; Benjamin Mayrargue</Authors>
+        <Owners>Benjamin Mayrargue</Owners>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Copyright>Sharpnado 2020; Vapolia 2024</Copyright>
+        <Company>Sharpnado; Vapolia</Company>
+        <RepositoryUrl>https://github.com/softlion/SharpnadoCompat.Shadows</RepositoryUrl>
+        <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageProjectUrl>https://vapolia.eu</PackageProjectUrl>
+        <PackageReleaseNotes>
+            1.0.0: initial forked version
+        </PackageReleaseNotes>
   </PropertyGroup>
+  
+  
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" />

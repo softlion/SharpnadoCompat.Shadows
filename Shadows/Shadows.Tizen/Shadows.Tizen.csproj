@@ -22,10 +22,6 @@
       <Link>AssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Shadows\Shadows.csproj" />
-  </ItemGroup>
 </Project>
 
 

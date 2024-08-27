@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <PropertyGroup>
-        <PackageId>Sharpnado.Shadows</PackageId>
+        <PackageId>Softlion.ShadowsCompat</PackageId>
 
         <Summary>Add as many custom shadows as you like to any Xamarin.Forms view (Android, iOS, UWP, Tizen). You can set Color, Opacity, Blur, Offset and CornerRadius. Easily achieve neumorphism.</Summary>
         <PackageTags>xamarin.forms android ios uwp tizen netstandard shadow blur color shadows neumorphism</PackageTags>

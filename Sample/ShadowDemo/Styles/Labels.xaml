@@ -3,15 +3,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Text.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-
     <Color x:Key="LabelAppsColor">#B0000000</Color>
     <Color x:Key="LabelAppsDarkColor">#B0FFFFFF</Color>
 
     <Style x:Key="LabelApps" TargetType="Label">
-        <Setter Property="FontFamily" Value="{StaticResource FontSemiBold}" />
+        <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="FontSize" Value="10" />
         <Setter Property="HorizontalOptions" Value="Center" />
@@ -19,7 +15,7 @@
     </Style>
 
     <Style x:Key="LabelSharpnado" TargetType="Label">
-        <Setter Property="FontFamily" Value="{StaticResource FontItalic}" />
+        <Setter Property="FontAttributes" Value="Italic" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="FontSize" Value="15" />
         <Setter Property="HorizontalOptions" Value="Center" />
@@ -27,12 +23,11 @@
     </Style>
 
     <Style TargetType="Span">
-        <Setter Property="FontFamily" Value="{StaticResource FontLight}" />
         <Setter Property="FontSize" Value="12" />
     </Style>
 
     <Style x:Key="SpanBold" TargetType="Span">
-        <Setter Property="FontFamily" Value="{StaticResource FontSemiBold}" />
+        <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="12" />
     </Style>
 

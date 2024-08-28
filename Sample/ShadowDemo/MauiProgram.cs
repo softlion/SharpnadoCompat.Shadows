@@ -14,7 +14,7 @@ public static partial class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-SemiBold.ttf", "OpenSansSemiBold");
             })
-            .UseSharpnadoShadowsCompat();
+            .UseSharpnadoShadowsCompat(true, true);
 
 #if DEBUG
         builder.Logging.AddDebug();

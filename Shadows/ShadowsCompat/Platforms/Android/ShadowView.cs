@@ -15,7 +15,7 @@ using Paint = Android.Graphics.Paint;
 using RectF = Android.Graphics.RectF;
 using View = Android.Views.View;
 
-public partial class ShadowView : View
+internal partial class ShadowView : View
 {
     private const int MinimumSize = 5;
     private const int MaxRadius = 100;
@@ -29,8 +29,10 @@ public partial class ShadowView : View
     private readonly BitmapCache _cache;
 
     private bool _isDisposed;
+    
+    public View? ShadowSource => _weakSource.TryGetTarget(out var view) ? view : null;
 
-    public ShadowView(Context context, View shadowSource, float cornerRadius, string tag = null)
+    public ShadowView(Context context, View shadowSource, float cornerRadius, string? tag = null)
         : base(context)
     {
         _renderScript = RenderScript.Create(context);
@@ -112,10 +114,8 @@ public partial class ShadowView : View
             shadeNotifyCollection.CollectionChanged -= ShadesSourceCollectionChanged;
         }
 
-        if (!_renderScript.IsNullOrDisposed())
-        {
+        if (_renderScript != null)
             _renderScript.Destroy();
-        }
 
         DisposeBitmaps();
 
@@ -128,17 +128,15 @@ public partial class ShadowView : View
         var stopWatch = new Stopwatch();
         stopWatch.Start();
 #endif
-        if (!_weakSource.TryGetTarget(out var source) || _renderScript.IsNullOrDisposed())
-        {
+        if (!_weakSource.TryGetTarget(out var source) || _renderScript == null)
             return;
-        }
 
         foreach (var shadeInfo in _shadeInfos.Values)
         {
             var shadow = _cache.GetOrCreate(shadeInfo.Hash, () => CreateBitmap(shadeInfo));
 
-            float x = source.GetX() + shadeInfo.OffsetX - MaxRadius;
-            float y = source.GetY() + shadeInfo.OffsetY - MaxRadius;
+            var x = source.GetX() + shadeInfo.OffsetX - MaxRadius;
+            var y = source.GetY() + shadeInfo.OffsetY - MaxRadius;
 
             InternalLogger.Debug(LogTag, () => $"OnDraw( {x}x, {y}y )");
 
@@ -209,7 +207,7 @@ public partial class ShadowView : View
     {
         if (!_weakSource.TryGetTarget(out var source)
             || !HasMinimumSize(source)
-            || _renderScript.IsNullOrDisposed())
+            || _renderScript == null)
         {
             return;
         }
@@ -263,13 +261,9 @@ public partial class ShadowView : View
         float blurAmount = shadeInfo.BlurRadius > MaxRadius ? MaxRadius : shadeInfo.BlurRadius;
         while (blurAmount > 0)
         {
-            Allocation input = Allocation.CreateFromBitmap(
-                _renderScript,
-                shadow,
-                Allocation.MipmapControl.MipmapNone,
-                AllocationUsage.Script);
-            Allocation output = Allocation.CreateTyped(_renderScript, input.Type);
-            ScriptIntrinsicBlur script = ScriptIntrinsicBlur.Create(_renderScript, Element.U8_4(_renderScript));
+            var input = Allocation.CreateFromBitmap(_renderScript, shadow, Allocation.MipmapControl.MipmapNone, AllocationUsage.Script);
+            var output = Allocation.CreateTyped(_renderScript, input.Type);
+            var script = ScriptIntrinsicBlur.Create(_renderScript, Element.U8_4(_renderScript));
 
             float blurRadius;
             if (blurAmount > MaxBlur)

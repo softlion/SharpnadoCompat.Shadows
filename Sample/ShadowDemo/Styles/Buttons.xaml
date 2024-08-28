@@ -52,7 +52,6 @@
             </OnPlatform>
         </Setter>
         <Setter Property="TextColor" Value="{DynamicResource DynamicTextPrimaryColor}" />
-        <Setter Property="FontFamily" Value="{StaticResource FontRegular}" />
         <Setter Property="FontSize" Value="{StaticResource TextSizeBody}" />
     </Style>
 

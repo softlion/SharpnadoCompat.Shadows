@@ -37,7 +37,7 @@
                    Margin="0,0,0,15"
                    HorizontalOptions="End"
                    VerticalOptions="End"
-                   FontFamily="{StaticResource FontItalic}"
+                   FontAttributes="Italic"
                    Text="The shadows logo is made of 7 different shades." />
 
             <StackLayout Grid.Row="2"

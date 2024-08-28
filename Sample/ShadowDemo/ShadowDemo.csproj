@@ -21,7 +21,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <UseNuget>true</UseNuget>
+        <UseNuget>false</UseNuget>
     </PropertyGroup>
 
     <ItemGroup>

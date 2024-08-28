@@ -1,32 +1,30 @@
-﻿namespace Sharpnado.Shades.Droid
+﻿namespace Sharpnado.Shades.Droid;
+
+internal class JniWeakReference<T> where T : Java.Lang.Object
 {
-    internal class JniWeakReference<T>
-        where T : Java.Lang.Object
+    private readonly WeakReference<T> _reference;
+
+    public JniWeakReference(T target)
     {
-        private readonly WeakReference<T> _reference;
+        _reference = new WeakReference<T>(target);
+    }
 
-        public JniWeakReference(T target)
+    public bool TryGetTarget(out T target)
+    {
+        target = null;
+        if (_reference.TryGetTarget(out var innerTarget))
         {
-            _reference = new WeakReference<T>(target);
-        }
-
-        public bool TryGetTarget(out T target)
-        {
-            target = null;
-            if (_reference.TryGetTarget(out var innerTarget))
+            if (innerTarget.Handle != IntPtr.Zero)
             {
-                if (innerTarget.Handle != IntPtr.Zero)
-                {
-                    target = innerTarget;
-                }
+                target = innerTarget;
             }
-
-            return target != null;
         }
 
-        public override string ToString()
-        {
-            return $"[JniWeakReference] {_reference}";
-        }
+        return target != null;
+    }
+
+    public override string ToString()
+    {
+        return $"[JniWeakReference] {_reference}";
     }
 }

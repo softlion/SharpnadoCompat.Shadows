@@ -40,6 +40,6 @@
 
     <Label Style="{StaticResource TextHuge}"
            VerticalOptions="Center"
-           FontFamily="{StaticResource FontKarmatic}"
            Text="Shadows" />
+    <!-- FontFamily="{StaticResource FontKarmatic}" -->
 </sho:Shadows>

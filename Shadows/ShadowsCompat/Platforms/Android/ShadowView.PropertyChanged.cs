@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace Sharpnado.Shades.Droid;
 
-public partial class ShadowView
+internal partial class ShadowView
 {
     private float _cornerRadius;
     private IList<Shade> _shadesSource;
@@ -11,9 +11,7 @@ public partial class ShadowView
     public void UpdateCornerRadius(float cornerRadius)
     {
         if (_isDisposed)
-        {
             return;
-        }
 
         InternalLogger.Debug(LogTag, () => $"UpdateCornerRadius( cornerRadius: {cornerRadius} )");
         var hasChanged = _cornerRadius != cornerRadius;
@@ -29,50 +27,38 @@ public partial class ShadowView
     public void UpdateShades(IEnumerable<Shade> shadesSource)
     {
         if (_isDisposed)
-        {
             return;
-        }
 
         if (shadesSource == null)
-        {
             return;
-        }
 
         InternalLogger.Debug(LogTag, () => $"UpdateShades( shadesSource: {shadesSource} )");
         _shadesSource = shadesSource.ToList();
 
         DisposeBitmaps();
-        for (int i = 0; i < _shadesSource.Count; i++)
-        {
+        for (var i = 0; i < _shadesSource.Count; i++)
             InsertShade(i, _shadesSource.ElementAt(i));
-        }
 
         Invalidate();
     }
 
-    public void ShadesSourceCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    public void ShadesSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (_isDisposed)
-        {
             return;
-        }
 
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
                 for (int i = 0, insertIndex = e.NewStartingIndex; i < e.NewItems.Count; i++)
-                {
                     InsertShade(insertIndex, (Shade)e.NewItems[i]);
-                }
 
                 Invalidate();
 
                 break;
             case NotifyCollectionChangedAction.Remove:
                 for (int i = 0, removedIndex = e.OldStartingIndex; i < e.OldItems.Count; i++)
-                {
                     RemoveShade(removedIndex, (Shade)e.OldItems[i]);
-                }
 
                 Invalidate();
                 break;
@@ -98,24 +84,19 @@ public partial class ShadowView
         DisposeBitmap(shade);
     }
 
-    private void ShadePropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void ShadePropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (_isDisposed)
-        {
             return;
-        }
 
         if (!Shade.IsShadeProperty(e.PropertyName))
-        {
             return;
-        }
 
         var shade = (Shade)sender;
         var index = _shadesSource.IndexOf(shade);
         if (index < 0)
         {
-            InternalLogger.Warn(
-                LogTag, $"ShadePropertyChanged => shade property {e.PropertyName} changed but we can't find the shade in the source");
+            InternalLogger.Warn(LogTag, $"ShadePropertyChanged => shade property {e.PropertyName} changed but we can't find the shade in the source");
             return;
         }
 

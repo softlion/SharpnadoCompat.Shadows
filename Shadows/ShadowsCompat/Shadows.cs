@@ -3,42 +3,34 @@ using System.Collections.Specialized;
 
 namespace Sharpnado.Shades;
 
-public class Shadows : ContentView
+public interface IShadows : IContentView
 {
-    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
-        nameof(CornerRadius),
-        typeof(int),
-        typeof(Shadows),
-        DefaultCornerRadius);
+    int CornerRadius { get; }
+    IEnumerable<Shade> Shades { get; }
+    
+    internal string StyleId { get; }
+    internal int InstanceNumber { get; }
+    internal event EventHandler<NotifyCollectionChangedEventArgs> WeakCollectionChanged;
+}
 
-    public static readonly BindableProperty ShadesProperty = BindableProperty.Create(
-        nameof(Shades),
-        typeof(IEnumerable<Shade>),
-        typeof(Shadows),
-        defaultValueCreator: (bo) => new ObservableCollection<Shade> { new Shade { Parent = (Shadows)bo } },
-        validateValue: (bo, v) => v is IEnumerable<Shade>,
-        propertyChanged: ShadesPropertyChanged,
-        coerceValue: CoerceShades);
-
-    private const int DefaultCornerRadius = 0;
+public class Shadows : ContentView, IShadows
+{
+    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(nameof(CornerRadius), typeof(int), typeof(Shadows), 0);
+    public static readonly BindableProperty ShadesProperty = BindableProperty.Create(nameof(Shades), typeof(IEnumerable<Shade>), typeof(Shadows),
+        propertyChanged: ShadesPropertyChanged, coerceValue: CoerceShades,
+        defaultValueCreator: bo => new ObservableCollection<Shade> { new() { Parent = (Shadows)bo } },
+        validateValue: (bo, v) => v is IEnumerable<Shade>);
 
     private static int instanceCount = 0;
+    private readonly WeakEventManager _weakCollectionChangedSource = new ();
 
-    readonly WeakEventManager _weakCollectionChangedSource = new ();
+    int IShadows.InstanceNumber { get; } = ++instanceCount;
 
-
-    public Shadows()
-    {
-        InstanceNumber = ++instanceCount;
-    }
-
-    public event EventHandler<NotifyCollectionChangedEventArgs> WeakCollectionChanged
+    event EventHandler<NotifyCollectionChangedEventArgs> IShadows.WeakCollectionChanged
     {
         add => _weakCollectionChangedSource.AddEventHandler(value);
         remove => _weakCollectionChangedSource.RemoveEventHandler(value);
     }
-
-    public int InstanceNumber { get; }
 
     public int CornerRadius
     {
@@ -55,7 +47,7 @@ public class Shadows : ContentView
     protected override void OnBindingContextChanged()
     {
         base.OnBindingContextChanged();
-
+        
         foreach (var shade in Shades)
             shade.BindingContext = BindingContext;
     }
@@ -64,39 +56,41 @@ public class Shadows : ContentView
     {
         if (value is not ReadOnlyCollection<Shade> readonlyCollection)
             return value;
-
+        
         return new ReadOnlyCollection<Shade>(readonlyCollection.Select(s => s.Clone()).ToList());
     }
 
-    private static void ShadesPropertyChanged(BindableObject bindable, object oldvalue, object newvalue)
+    private static void ShadesPropertyChanged(BindableObject bindable, object? oldValue, object newValue)
     {
         var shadows = (Shadows)bindable;
-        var enumerableShades = (IEnumerable<Shade>)newvalue;
 
-        if (oldvalue != null)
+        if (oldValue is IEnumerable<Shade> oldShades)
         {
-            if (oldvalue is INotifyCollectionChanged oldCollection)
+            if (oldValue is INotifyCollectionChanged oldCollection)
                 oldCollection.CollectionChanged -= shadows.OnShadeCollectionChanged;
 
-            foreach (var shade in enumerableShades)
+            foreach (var shade in oldShades)
             {
                 shade.Parent = null;
                 shade.BindingContext = null;
             }
         }
 
-        foreach (var shade in enumerableShades)
+        var newShades = (IEnumerable<Shade>)newValue;
+        foreach (var shade in newShades)
         {
             shade.Parent = shadows;
             shade.BindingContext = shadows.BindingContext;
         }
 
-        if (newvalue is INotifyCollectionChanged newCollection)
+        if (newValue is INotifyCollectionChanged newCollection)
             newCollection.CollectionChanged += shadows.OnShadeCollectionChanged;
     }
 
-    private void OnShadeCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnShadeCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        var hasChanged = false;
+
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
@@ -106,7 +100,7 @@ public class Shadows : ContentView
                     {
                         newShade.Parent = this;
                         newShade.BindingContext = BindingContext;
-                        _weakCollectionChangedSource.HandleEvent(this, e, nameof(WeakCollectionChanged));
+                        hasChanged = true;
                     }
                 }
                 break;
@@ -119,10 +113,13 @@ public class Shadows : ContentView
                     {
                         oldShade.Parent = null;
                         oldShade.BindingContext = null;
-                        _weakCollectionChangedSource.HandleEvent(this, e, nameof(WeakCollectionChanged));
+                        hasChanged = true;
                     }
                 }
                 break;
         }
+
+        if(hasChanged)
+            _weakCollectionChangedSource.HandleEvent(this, e, nameof(IShadows.WeakCollectionChanged));
     }
 }

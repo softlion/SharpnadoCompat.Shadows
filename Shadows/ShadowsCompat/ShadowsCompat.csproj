@@ -27,6 +27,12 @@
     <ItemGroup>
         <None Include="../../LICENSE" Pack="true" PackagePath="" />
         <None Include="../../README.md" Pack="true" PackagePath="" />
+        <None Include="Platforms\Tizen\ColorExtensions.cs" />
+        <None Include="Platforms\Tizen\Interop.cs" />
+        <None Include="Platforms\Tizen\TizenShadowsRenderer.cs" />
+        <None Include="Platforms\Windows\UWPShadowsController.cs" />
+        <None Include="Platforms\Windows\UWPShadowsController.PropertyChanged.cs" />
+        <None Include="Platforms\Windows\UWPShadowsRenderer.cs" />
 <!--        <None Include="../icon.png" Pack="true" PackagePath="" />-->
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
     </ItemGroup>
@@ -73,9 +79,4 @@
         </PackageReleaseNotes>
   </PropertyGroup>
   
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.80" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" />
-  </ItemGroup>
 </Project>

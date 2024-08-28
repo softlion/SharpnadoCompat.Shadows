@@ -1,0 +1,17 @@
+<?xaml-comp compile="true" ?>
+<ResourceDictionary              
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Text.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="Entry">
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontFamily" Value="{StaticResource FontSemiBold}" />
+    </Style>
+
+</ResourceDictionary>
